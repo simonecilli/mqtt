@@ -1,41 +1,40 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
-	<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.min.js" type="text/javascript"></script>
-	<script type="text/javascript">
-function callNode() {
-    $.ajax({
-        cache : false,
-		// setup the server address
-        url : 'http://localhost:9002/',
-        data : {},
-        success : function(response, code, xhr) {
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+		<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.min.js" type="text/javascript"></script>
+		<script type="text/javascript">
+function updateInfo() {
+	$.ajax({
+		cache : false,
+		url : 'http://localhost:9002/',
+		data : {},
+		success : function(response, code, xhr) {
             //if ('OK' == response) {
             //	alert(
              //   return false;
             //}
-			alert("response:"+response+"-code:"+code);
-            // do whatever you want with the response
-            //...
- 
-            // make new call
-            //callNode();
-        }
-    });
+			$('#iot-data').val(response + '\n' + $('#iot-data').val());
+
+			// make new call
+			updateInfo();
+		}
+	});
 };
-callNode();
-    </script>
-	<style>
+function init(){ updateInfo(); }
+		</script>
+		<style>
 .dlfield{clear:both;width:100%}
 .dlfieldname{float:left;width:20%}
 .dlfieldinput{float:left;width:50%}
 .dlbutton{float:left;margin-top:20px;width:100%}
 .dlbuttonpush{margin-left:15%}
-	</style>
-  </head>
-  <body onload="init()">
-	<h1>IOT subscriber</h1>
-  </body>
+		</style>
+	</head>
+	<body onload="init()">
+		<h1>IOT subscriber</h1>
+		<div><b>New messages:</b></div>
+		<textarea id="iot-data" cols="200" rows="20"></textarea>
+	</body>
 </html>
