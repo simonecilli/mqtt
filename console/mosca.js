@@ -56,24 +56,25 @@ function IOTNode (id) {
 	};
 	this.serialize = function() {
 		var str =
-			'{ id: '    + this.id       + ',' +
-			'state:'    + this.state    + ',' +
-			'publishN:' + this.publishN + ',' +
-			'lastTms:'  + this.lastTms  + ',' +
-			'topics: {';
+			'{ "id": "'    + this.id       + '",' +
+			'"state":"'    + this.state    + '",' +
+			'"publishN":"' + this.publishN + '",' +
+			'"lastTms":"'  + this.lastTms  + '",' +
+			'"topics": [';
 		for (var i = 0; i < this.topics.length; i++) {
-			str += this.topics[i];
+			str += '"' + this.topics[i] + '"';
 			if (i != (this.topics.length-1))
 				str += ",";
 		}
-		str += '}}';
+		str += ']}';
 		return str;
 	};
 }
 function serializeIOTNodes(){
-	var str = "{";
-	for (var key in iotNodes) str += iotNodes[key].serialize();
-	str += "}";
+	var str = "[";
+	for (var key in iotNodes) str += iotNodes[key].serialize() + ',';
+	if (str[str.length-1] == ',') str = str.slice(0, -1);
+	str += "]";
 	return str;
 }
 Array.prototype.contains = function(obj) {

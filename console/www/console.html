@@ -11,14 +11,13 @@ function updateInfo() {
 		url : 'http://localhost:9002/',
 		data : {},
 		success : function(response, code, xhr) {
-            //if ('OK' == response) {
-            //	alert(
-             //   return false;
-            //}
+			//console.log(response);
+			jsonObj = $.parseJSON(response);
+			//console.log(jsonObj);
 			$('#iot-data').val(response + '\n' + $('#iot-data').val());
 
 			// make new call
-			updateInfo();
+			setTimeout(function() { updateInfo() }, 500);
 		}
 	});
 };
