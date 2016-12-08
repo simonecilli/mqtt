@@ -77,10 +77,13 @@ function IOTNode (id) {
 		if ($('#' + goi).length == 0) {
 			// NEW NODE
 			$('#nodes').append(
-				'<div id="' + goi + '">' +
-				' <div id="' + goi + '-id">' + this.id + '</div>' +
-				' <div id="' + goi + '-state">' + this.state + '</div>' +
-				' <div id="' + goi + '-topics">' + this.getTopicsStr() + '</div>' +
+				'<div id="' + goi + '" class="node">' +
+				' <div class="node-img"><img src="img/user.png" ></div>' +
+				' <div class="node-data">' +
+				'  <div id="' + goi + '-id" class="node-id">' + this.id + '</div>' +
+				'  <div id="' + goi + '-state" class="node-state">' + this.state + '</div>' +
+				'  <div id="' + goi + '-topics" class="node-topics">' + this.getTopicsStr() + '</div>' +
+				' </div>' +
 				'</div>'
 			);
 		} else {
@@ -141,17 +144,21 @@ function updateGUI() {
 function init(){ updateInfo(); updateGUI(); }
 		</script>
 		<style>
-.dlfield{clear:both;width:100%}
-.dlfieldname{float:left;width:20%}
-.dlfieldinput{float:left;width:50%}
-.dlbutton{float:left;margin-top:20px;width:100%}
-.dlbuttonpush{margin-left:15%}
+body{margin:0;padding:0;border:0;outline:0;font-size:80%;vertical-align:baseline;background:transparent;}
+.title{border-bottom:2px solid;font-size:150%;font-weight:bold;margin-bottom:10px;padding:10px 0;text-align:center;width:100%}
+.nodes{width:100%}
+.node{border-bottom:1px solid;clear:both;height:100px;margin-bottom:10px;width:100%}
+.node-img{float:left;text-align:center;width:30%}
+.node-img img{margin-top:10px;width:80px}
+.node-data{float:left;width:70%}
+.node-id{font-weight:bold;margin-bottom:10px;width:100%}
+.node-state{width:100%}
+.node-topics{width:100%}
 		</style>
 	</head>
 	<body onload="init()">
-		<h1>Console</h1>
-		<div><b>New messages:</b></div>
-		<div id="nodes">
+		<div class="title">Console</div>
+		<div id="nodes" class="nodes">
 		</div>
 	</body>
 </html>
