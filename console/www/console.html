@@ -5,23 +5,140 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
 		<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.min.js" type="text/javascript"></script>
 		<script type="text/javascript">
+var iotNodes = {};
+function IOTNode (id) {
+	this.id        = id;
+	this.state     = "?";
+	this.topics    = [];
+	this.publishN  = 0;
+	this.lastTms   = 0;
+	this.connect = function() {
+		this.state   = "connected";
+		this.lastTms = new Date().getTime();
+		iotNewDataFlag = true;
+	};
+	this.disconnect = function() {
+		this.state   = "disconnected";
+		this.topics  = [];
+		this.lastTms = new Date().getTime();
+		iotNewDataFlag = true;
+	};
+	this.subscribe = function(topic) {
+		if (!this.topics.contains(topic))
+			this.topics.push(topic);
+		this.lastTms = new Date().getTime();
+		iotNewDataFlag = true;
+	};
+	this.unsubscribe = function(topic) {		
+		if (this.topics.contains(topic))
+			this.topics.remove(topic);
+		this.lastTms = new Date().getTime();
+		iotNewDataFlag = true;
+	};
+	this.publish = function(packet) {
+		this.lastTms = new Date().getTime();
+		if (this.id != packet.payload)
+			this.publishN++
+	};
+	this.serialize = function() {
+		var str =
+			'{ "id": "'    + this.id       + '",' +
+			'"state":"'    + this.state    + '",' +
+			'"publishN":"' + this.publishN + '",' +
+			'"lastTms":"'  + this.lastTms  + '",' +
+			'"topics": [';
+		for (var i = 0; i < this.topics.length; i++) {
+			str += '"' + this.topics[i] + '"';
+			if (i != (this.topics.length-1))
+				str += ",";
+		}
+		str += ']}';
+		return str;
+	};
+	this.deserialize = function(obj) {
+		this.id        = obj.id;
+		this.state     = obj.state;
+		this.publishN  = obj.publishN;
+		this.lastTms   = obj.lastTms;
+		this.topics    = obj.topics;
+	};
+	this.getTopicsStr = function() {
+		str = "";
+		for (var i = 0; i < this.topics.length; i++) {
+			str += this.topics[i];
+			if (i != (this.topics.length-1))
+				str += ", ";
+		}
+		return str;
+	};
+	this.show2GUI = function(){
+		var t = new Date().getTime();
+		var goi = 'node-' + this.id;
+		if ($('#' + goi).length == 0) {
+			// NEW NODE
+			$('#nodes').append(
+				'<div id="' + goi + '">' +
+				' <div id="' + goi + '-id">' + this.id + '</div>' +
+				' <div id="' + goi + '-state">' + this.state + '</div>' +
+				' <div id="' + goi + '-topics">' + this.getTopicsStr() + '</div>' +
+				'</div>'
+			);
+		} else {
+			// UPDATE NODE
+			if (t > (this.lastTms + 60000))
+				$('#' + goi + '-state').text("Disappeared");
+			else
+				$('#' + goi + '-state').text(this.state);
+			$('#' + goi + '-topics').text(this.getTopicsStr());
+		}
+	};
+}
+function serializeIOTNodes(){
+	var str = "[";
+	for (var key in iotNodes) str += iotNodes[key].serialize() + ',';
+	if (str[str.length-1] == ',') str = str.slice(0, -1);
+	str += "]";
+	return str;
+}
+function deserializeIOTNodes(json){
+	jsonObjs = $.parseJSON(json);
+	for (var i = 0; i < jsonObjs.length; i++) {
+		node = new IOTNode("");
+		node.deserialize(jsonObjs[i]);
+		iotNodes[node.id] = node;
+	}
+}
+Array.prototype.contains = function(obj) {
+	var i = this.length;
+	while (i--) {
+		if (this[i] == obj) return true;
+	}
+	return false;
+}
+Array.prototype.remove = function(obj) {
+	var index = this.indexOf(obj);
+	if (index > -1) this.splice(index, 1);
+}
 function updateInfo() {
 	$.ajax({
 		cache : false,
 		url : 'http://localhost:9002/',
 		data : {},
 		success : function(response, code, xhr) {
-			//console.log(response);
-			jsonObj = $.parseJSON(response);
-			//console.log(jsonObj);
-			$('#iot-data').val(response + '\n' + $('#iot-data').val());
-
-			// make new call
+			deserializeIOTNodes(response);
 			setTimeout(function() { updateInfo() }, 500);
+		},
+		error: function(){
+			setTimeout(function() { updateInfo() }, 1000);
 		}
 	});
 };
-function init(){ updateInfo(); }
+function updateGUI() {
+	for (var id in iotNodes)
+		iotNodes[id].show2GUI();
+	setTimeout(function() { updateGUI() }, 1000);
+}
+function init(){ updateInfo(); updateGUI(); }
 		</script>
 		<style>
 .dlfield{clear:both;width:100%}
@@ -32,8 +149,9 @@ function init(){ updateInfo(); }
 		</style>
 	</head>
 	<body onload="init()">
-		<h1>IOT subscriber</h1>
+		<h1>Console</h1>
 		<div><b>New messages:</b></div>
-		<textarea id="iot-data" cols="200" rows="20"></textarea>
+		<div id="nodes">
+		</div>
 	</body>
 </html>

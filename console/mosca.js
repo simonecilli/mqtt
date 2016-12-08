@@ -6,7 +6,7 @@ var httpPort   = 9001;
 var mqttPort   = 1883;
 var ajaxPort   = 9002;
 var ajaxPollMs = 1000;
-var ajaxToMs   = 60000;
+var ajaxToMs   = 30000;
 var wwwStaticFolder = './www/';
 
 // SHOW CONFIGURATION
@@ -68,6 +68,13 @@ function IOTNode (id) {
 		}
 		str += ']}';
 		return str;
+	};
+	this.deserialize = function(obj) {
+		this.id        = obj.id;
+		this.state     = obj.state;
+		this.publishN  = obj.publishN;
+		this.lastTms   = obj.lastTms;
+		this.topics    = obj.topics;
 	};
 }
 function serializeIOTNodes(){
