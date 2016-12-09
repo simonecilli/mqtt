@@ -51,9 +51,9 @@ function IOTNode (id) {
 		iotNewDataFlag = true;
 	};
 	this.publish = function(packet) {
-		this.lastTms = new Date().getTime();
 		if (this.id != packet.payload)
-			this.publishN
+			this.publishN++;
+		this.lastTms = new Date().getTime();
 		iotNewDataFlag = true;
 	};
 	this.serialize = function() {

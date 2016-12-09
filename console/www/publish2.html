@@ -2,13 +2,13 @@
 <html>
 	<head>
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
-	<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.min.js" type="text/javascript"></script>
+		<script type="text/javascript" src="js/mqttws31.js"></script>
+		<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
 	<script type="text/javascript">
 var client;
 var ip = "localhost";
 var port = 9001;
-var us = "publisher1";
+var us = "pub2";
 var pw = "publisher1pw";
 var topic = $('#ftopic').val();
 var msg = $('#fmsg').val();
@@ -28,16 +28,16 @@ function publish() {
 	message = new Paho.MQTT.Message('PIPPOCODE');
 	message.destinationName = 'iot/dev/' + us + '/code';
 	client.send(message);
-	// every 10 seconds
-	if (count%10 == 0)
+	// every 5 seconds
+	if (count%5 == 0)
 	{
 		//iot/dev/<serial>/sensors/temperature
-		temperature = Math.random*100;
+		temperature = Math.floor(Math.random()*100*1000);
 		message = new Paho.MQTT.Message(''+temperature);
 		message.destinationName = 'iot/dev/' + us + '/sensors/temperature';
 		client.send(message)
 		//iot/dev/<serial>/statistics/goodread
-		goodread = Math.random*100;
+		goodread = Math.floor(Math.random()*100);
 		message = new Paho.MQTT.Message(''+goodread);
 		message.destinationName = 'iot/dev/' + us + '/statistics/goodread';
 		client.send(message);
@@ -58,7 +58,7 @@ function init() {
 		print('New msg: ' + message.payloadString);
 	};
 	var options = {
-		timeout: 3,
+		timeout: 600,
 		onSuccess: function () {
 			print("mqtt connected");
 			publish();

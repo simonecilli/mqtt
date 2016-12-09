@@ -2,8 +2,8 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
-		<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.min.js" type="text/javascript"></script>
+		<script type="text/javascript" src="js/mqttws31.js"></script>
+		<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
 		<script type="text/javascript">
 var iotNodes = {};
 function IOTNode (id) {
@@ -86,22 +86,27 @@ function IOTNode (id) {
 		var t = new Date().getTime();
 		var goi = 'node-' + this.id;
 		if ($('#' + goi).length == 0) {
-			// NEW NODE
-			$('#nodes').append(
-				'<div id="' + goi + '" class="node">' +
-				' <div class="node-img"><img src="img/user.png" ></div>' +
-				' <div class="node-data">' +
-				'  <div id="' + goi + '-id" class="node-id">' + this.id + '</div>' +
-				'  <div id="' + goi + '-state" class="node-state">' + this.state + '</div>' +
-				'  <div id="' + goi + '-id" class="node-role">' + this.role + '</div>' +
-				'  <div id="' + goi + '-topics" class="node-topics">' + this.getTopicsStr() + '</div>' +
-				'  <div id="' + goi + '-pub" class="node-pub">' + ((this.publishN>0)? this.publishN + ' message(s)' : '') + '</div>' +
-				' </div>' +
-				'</div>'
-			);
+			//if (t > (this.lastTms + 60000)) {
+				// NEW NODE
+				$('#nodes').append(
+					'<div id="' + goi + '" class="node">' +
+					' <div class="node-img"><img src="img/user.png" ></div>' +
+					' <div class="node-data">' +
+					'  <div id="' + goi + '-id" class="node-id">' + this.id + '</div>' +
+					'  <div id="' + goi + '-state" class="node-state">' + this.state + '</div>' +
+					'  <div id="' + goi + '-role" class="node-role">' + this.role + '</div>' +
+					'  <div id="' + goi + '-topics" class="node-topics">' + this.getTopicsStr() + '</div>' +
+					'  <div id="' + goi + '-pub" class="node-pub">' + ((this.publishN>0)? this.publishN + ' message(s)' : '') + '</div>' +
+					' </div>' +
+					'</div>'
+				);
+			//}
+		//} else if (t > (this.lastTms + 60000)) {
+			// REMOVE OLD NODE
+		//	$('#' + goi).remove();
 		} else {
 			// UPDATE NODE
-			if (t > (this.lastTms + 60000)) {
+			if (t > (this.lastTms + 30000)) {
 				$('#' + goi + '-state').text("Disappeared");
 				$('#' + goi + '-role').text('');
 			} else {
