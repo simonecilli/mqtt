@@ -8,6 +8,7 @@
 var iotNodes = {};
 function IOTNode (id) {
 	this.id        = id;
+	this.role      = 'role undefined';
 	this.state     = "?";
 	this.topics    = [];
 	this.publishN  = 0;
@@ -38,7 +39,8 @@ function IOTNode (id) {
 	this.publish = function(packet) {
 		this.lastTms = new Date().getTime();
 		if (this.id != packet.payload)
-			this.publishN++
+			this.publishN
+		iotNewDataFlag = true;
 	};
 	this.serialize = function() {
 		var str =
@@ -61,6 +63,15 @@ function IOTNode (id) {
 		this.publishN  = obj.publishN;
 		this.lastTms   = obj.lastTms;
 		this.topics    = obj.topics;
+		if (this.publishN == 0 && this.topics.length == 0) {
+			this.role = 'role undefined';
+		} else if (this.publishN == 0) {
+			this.role = 'subscriber';
+		} else if (this.topics.length == 0) {
+			this.role = 'publisher';
+		} else {
+			this.role = 'publisher & subscriber';
+		}
 	};
 	this.getTopicsStr = function() {
 		str = "";
@@ -82,16 +93,21 @@ function IOTNode (id) {
 				' <div class="node-data">' +
 				'  <div id="' + goi + '-id" class="node-id">' + this.id + '</div>' +
 				'  <div id="' + goi + '-state" class="node-state">' + this.state + '</div>' +
+				'  <div id="' + goi + '-id" class="node-role">' + this.role + '</div>' +
 				'  <div id="' + goi + '-topics" class="node-topics">' + this.getTopicsStr() + '</div>' +
+				'  <div id="' + goi + '-pub" class="node-pub">' + ((this.publishN>0)? this.publishN + ' message(s)' : '') + '</div>' +
 				' </div>' +
 				'</div>'
 			);
 		} else {
 			// UPDATE NODE
-			if (t > (this.lastTms + 60000))
+			if (t > (this.lastTms + 60000)) {
 				$('#' + goi + '-state').text("Disappeared");
-			else
+				$('#' + goi + '-role').text('');
+			} else {
 				$('#' + goi + '-state').text(this.state);
+				$('#' + goi + '-role').text(this.role);
+			}
 			$('#' + goi + '-topics').text(this.getTopicsStr());
 		}
 	};
@@ -153,6 +169,7 @@ body{margin:0;padding:0;border:0;outline:0;font-size:80%;vertical-align:baseline
 .node-data{float:left;width:70%}
 .node-id{font-weight:bold;margin-bottom:10px;width:100%}
 .node-state{width:100%}
+.node-role{width:100%}
 .node-topics{width:100%}
 		</style>
 	</head>

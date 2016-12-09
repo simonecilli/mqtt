@@ -17,11 +17,12 @@ console.log("MQTT PORT : " + mqttPort);
 console.log("WWW DIR.  : " + wwwStaticFolder);
 console.log("");
 
-// NODE 
+// NODE
 var iotNewDataFlag = true;
 var iotNodes = {};
 function IOTNode (id) {
 	this.id        = id;
+	this.role      = 'role undefined';
 	this.state     = "?";
 	this.topics    = [];
 	this.publishN  = 0;
@@ -52,7 +53,8 @@ function IOTNode (id) {
 	this.publish = function(packet) {
 		this.lastTms = new Date().getTime();
 		if (this.id != packet.payload)
-			this.publishN++
+			this.publishN
+		iotNewDataFlag = true;
 	};
 	this.serialize = function() {
 		var str =
@@ -75,6 +77,24 @@ function IOTNode (id) {
 		this.publishN  = obj.publishN;
 		this.lastTms   = obj.lastTms;
 		this.topics    = obj.topics;
+		if (this.publishN == 0 && this.topics.length == 0) {
+			this.role = 'role undefined';
+		} else if (this.publishN == 0) {
+			this.role = 'subscriber';
+		} else if (this.topics.length == 0) {
+			this.role = 'publisher';
+		} else {
+			this.role = 'publisher & subscriber';
+		}
+	};
+	this.getTopicsStr = function() {
+		str = "";
+		for (var i = 0; i < this.topics.length; i++) {
+			str += this.topics[i];
+			if (i != (this.topics.length-1))
+				str += ", ";
+		}
+		return str;
 	};
 }
 function serializeIOTNodes(){
@@ -140,10 +160,11 @@ server.on('unsubscribed', function(topic, client) {
 	console.log('Client ' + client.id + ' unsubscribe ' + topic);
 });
 server.on('published', function(packet, client) {
-	//var node = iotNodes[client.id];
-	//if (node == undefined) node = new IOTNode(client.id);
-	//node.publish(packet);
-	//console.log('Client ' + client.id + ' publish ' + packet.payload);
+	if (client != undefined) {
+		var node = iotNodes[client.id];
+		if (node == undefined) node = new IOTNode(client.id);
+		node.publish(packet);
+	}
 });
 server.on('ready', function() { console.log('Mosca server is up and running'); });
 
