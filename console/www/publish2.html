@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+	<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.min.js" type="text/javascript"></script>
+	<script type="text/javascript">
+var client;
+var ip = "localhost";
+var port = 9001;
+var us = "publisher1";
+var pw = "publisher1pw";
+var topic = $('#ftopic').val();
+var msg = $('#fmsg').val();
+var count = 0;
+function print(msg) {
+	t = new Date().getTime();
+	$('#iot-data').val(t + ' - ' + msg + '\n' + $('#iot-data').val());
+}
+function publish() {
+	// iot/dev/hello
+	message = new Paho.MQTT.Message(us + '|' + us + '|127.0.0.1|255.255.0.0');
+	message.destinationName = 'iot/dev/hello';
+	client.send(message);
+	//iot/dev/<serial>/img
+	//no
+	//iot/dev/<serial>/code
+	message = new Paho.MQTT.Message('PIPPOCODE');
+	message.destinationName = 'iot/dev/' + us + '/code';
+	client.send(message);
+	// every 10 seconds
+	if (count%10 == 0)
+	{
+		//iot/dev/<serial>/sensors/temperature
+		temperature = Math.random*100;
+		message = new Paho.MQTT.Message(''+temperature);
+		message.destinationName = 'iot/dev/' + us + '/sensors/temperature';
+		client.send(message)
+		//iot/dev/<serial>/statistics/goodread
+		goodread = Math.random*100;
+		message = new Paho.MQTT.Message(''+goodread);
+		message.destinationName = 'iot/dev/' + us + '/statistics/goodread';
+		client.send(message);
+		//iot/dev/<serial>/statistics/noread
+		message = new Paho.MQTT.Message(''+(100-goodread));
+		message.destinationName = 'iot/dev/' + us + '/statistics/noread';
+		client.send(message);
+	}
+	count++;
+	setTimeout(function() { publish() }, 1000);
+}
+function init() {
+	client = new Paho.MQTT.Client(ip, port, us);
+	client.onConnectionLost = function (responseObject) {
+		print("connection lost: " + responseObject.errorMessage);
+	};
+	client.onMessageArrived = function (message) {
+		print('New msg: ' + message.payloadString);
+	};
+	var options = {
+		timeout: 3,
+		onSuccess: function () {
+			print("mqtt connected");
+			publish();
+		},
+		onFailure: function (message) {
+			print("Connection failed: " + message.errorMessage);
+		}
+	};
+	client.connect(options);
+}
+    </script>
+	<style>
+.dlfield{clear:both;width:100%}
+.dlfieldname{float:left;width:20%}
+.dlfieldinput{float:left;width:50%}
+.dlbutton{float:left;margin-top:20px;width:100%}
+.dlbuttonpush{margin-left:15%}
+	</style>
+  </head>
+  <body onload="init()">
+	<h1>IOT Publisher - send data to broker periodically</h1>
+	<textarea id="iot-data" cols="200" rows="20"></textarea>
+  </body>
+</html>
