@@ -86,7 +86,7 @@ function IOTNode (id) {
 		var t = new Date().getTime();
 		var goi = 'node-' + this.id;
 		if ($('#' + goi).length == 0) {
-			//if (t > (this.lastTms + 60000)) {
+			if (this.state != 'disappeared') {
 				// NEW NODE
 				$('#nodes').append(
 					'<div id="' + goi + '" class="node">' +
@@ -100,20 +100,18 @@ function IOTNode (id) {
 					' </div>' +
 					'</div>'
 				);
-			//}
-		//} else if (t > (this.lastTms + 60000)) {
-			// REMOVE OLD NODE
-		//	$('#' + goi).remove();
+			}
 		} else {
-			// UPDATE NODE
-			if (t > (this.lastTms + 30000)) {
-				$('#' + goi + '-state').text("Disappeared");
-				$('#' + goi + '-role').text('');
+		
+			if (this.state == 'disappeared') {
+				// REMOVE OLD NODE
+				$('#' + goi).remove();
 			} else {
+				// UPDATE NODE
 				$('#' + goi + '-state').text(this.state);
 				$('#' + goi + '-role').text(this.role);
+				$('#' + goi + '-topics').text(this.getTopicsStr());
 			}
-			$('#' + goi + '-topics').text(this.getTopicsStr());
 		}
 	};
 }

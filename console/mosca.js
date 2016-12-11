@@ -6,7 +6,7 @@ var httpPort   = 9001;
 var mqttPort   = 1883;
 var ajaxPort   = 9002;
 var ajaxPollMs = 1000;
-var ajaxToMs   = 30000;
+var ajaxToMs   = 15000;
 var wwwStaticFolder = './www/';
 
 // SHOW CONFIGURATION
@@ -177,6 +177,16 @@ http.createServer(function(request, response) {
 function checkIOTStatus(request, requestT, response)
 {
 	var date = new Date().getTime();
+	// Find disappeared node
+	for (var key in iotNodes) {
+		if ((iotNodes[key].state == 'disconnected') &&
+		    (date - iotNodes[key].lastTms > 60000))
+		{
+			iotNodes[key].state = 'disappeared';
+			console.log('Remove node '+key);
+		}
+	}
+	// Send response due to a timeout
 	if (date-requestT >= ajaxToMs) {
 		response.writeHead(200, {
 			'Content-Type'   : 'text/plain',
